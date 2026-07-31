@@ -25,12 +25,19 @@ import { MODELS, PROVIDERS, type ModelDef } from "@/lib/models";
 import { estimateCost } from "@/lib/pricing";
 import { useTokenizerWorker } from "@/lib/use-tokenizer-worker";
 import { TokenVisualizer } from "@/components/token-visualizer";
+import { ui, type Locale } from "@/lib/i18n";
 
 const DEFAULT_MODEL_ID = MODELS[0].id;
 const COMPARE_MODEL_ID = MODELS[2]?.id ?? MODELS[0].id;
 const SAMPLE_TEXT =
-  "Cola aqui o teu prompt para veres quantos tokens cada modelo usa — e quanto custaria.";
+  "Paste your prompt here to see how many tokens each model uses — and what it would cost.";
 const DEBOUNCE_MS = 250;
+
+const INTL_LOCALE: Record<Locale, string> = {
+  pt: "pt-PT",
+  en: "en-US",
+  de: "de-DE",
+};
 
 type Status = "idle" | "loading" | "ready" | "error";
 
@@ -51,17 +58,9 @@ function emptyRows(): Record<string, Row> {
   );
 }
 
-function formatNumber(n: number) {
-  return new Intl.NumberFormat("pt-PT").format(n);
-}
+export function Tokenizer({ locale }: { locale: Locale }) {
+  const t = ui[locale];
 
-function formatCost(n: number) {
-  if (n === 0) return "$0.00";
-  if (n < 0.01) return `< $0.01`;
-  return `$${n.toFixed(2)}`;
-}
-
-export function Tokenizer() {
   const [text, setText] = useState(SAMPLE_TEXT);
   const [selectedId, setSelectedId] = useState(DEFAULT_MODEL_ID);
   const [compareMode, setCompareMode] = useState(false);
@@ -72,6 +71,24 @@ export function Tokenizer() {
   // Guards against a slow response from an earlier keystroke overwriting a
   // newer one — only the latest debounce "generation" is allowed to apply.
   const generationRef = useRef(0);
+
+  const formatNumber = useMemo(() => {
+    const fmt = new Intl.NumberFormat(INTL_LOCALE[locale]);
+    return (n: number) => fmt.format(n);
+  }, [locale]);
+
+  const formatCost = (n: number) => {
+    if (n === 0) return "$0.00";
+    // Small prompts can cost a fraction of a cent — show up to 7 decimal
+    // places for those, trimming trailing zeros, instead of hiding the
+    // value behind "< $0.01".
+    const decimals = n < 0.01 ? 7 : 2;
+    const trimmed = n
+      .toFixed(decimals)
+      .replace(/0+$/, "")
+      .replace(/\.$/, "");
+    return `$${trimmed}`;
+  };
 
   const selectedModel = useMemo(
     () => MODELS.find((m) => m.id === selectedId)!,
@@ -117,21 +134,18 @@ export function Tokenizer() {
       <div className="flex min-w-0 flex-col gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>O teu texto</CardTitle>
-            <CardDescription>
-              Escreve ou cola o prompt — a contagem atualiza automaticamente
-              para todos os modelos.
-            </CardDescription>
+            <CardTitle>{t.yourTextTitle}</CardTitle>
+            <CardDescription>{t.yourTextDesc}</CardDescription>
           </CardHeader>
           <CardContent>
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Escreve aqui..."
+              placeholder={t.textareaPlaceholder}
               className="min-h-32 resize-y font-mono text-sm"
             />
             <p className="text-muted-foreground mt-2 text-xs">
-              {formatNumber(text.length)} caracteres
+              {t.charCount(formatNumber(text.length))}
             </p>
           </CardContent>
         </Card>
@@ -139,11 +153,9 @@ export function Tokenizer() {
         <Card>
           <CardHeader className="flex flex-row items-start justify-between gap-4">
             <div>
-              <CardTitle>Modelo</CardTitle>
+              <CardTitle>{t.modelTitle}</CardTitle>
               <CardDescription>
-                {compareMode
-                  ? "Compara dois modelos lado a lado."
-                  : "Escolhe o modelo para ver o detalhe."}
+                {compareMode ? t.modelDescCompare : t.modelDescSingle}
               </CardDescription>
             </div>
             <Button
@@ -152,7 +164,7 @@ export function Tokenizer() {
               size="sm"
               onClick={() => setCompareMode((v) => !v)}
             >
-              {compareMode ? "A comparar" : "Comparar 2 modelos"}
+              {compareMode ? t.compareToggleOn : t.compareToggleOff}
             </Button>
           </CardHeader>
           <CardContent className="flex flex-col gap-6">
@@ -160,6 +172,9 @@ export function Tokenizer() {
               className={`grid gap-6 ${compareMode ? "xl:grid-cols-2" : "grid-cols-1"}`}
             >
               <ModelPanel
+                t={t}
+                formatNumber={formatNumber}
+                formatCost={formatCost}
                 model={selectedModel}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
@@ -168,6 +183,9 @@ export function Tokenizer() {
               />
               {compareMode && (
                 <ModelPanel
+                  t={t}
+                  formatNumber={formatNumber}
+                  formatCost={formatCost}
                   model={compareModel}
                   selectedId={compareId}
                   onSelect={setCompareId}
@@ -182,12 +200,8 @@ export function Tokenizer() {
 
       <Card className="lg:sticky lg:top-6">
         <CardHeader>
-          <CardTitle>Eficiência de tokenização</CardTitle>
-          <CardDescription>
-            Mesma frase, tokenizers diferentes — menos tokens = mais barato
-            para este texto. (Não mede velocidade nem qualidade da resposta —
-            só quanto cada modelo &quot;paga&quot; para ler este prompt.)
-          </CardDescription>
+          <CardTitle>{t.efficiencyTitle}</CardTitle>
+          <CardDescription>{t.efficiencyDesc}</CardDescription>
         </CardHeader>
         <CardContent className="flex max-h-[70vh] flex-col gap-3 overflow-y-auto">
           {MODELS.map((model) => {
@@ -233,12 +247,18 @@ export function Tokenizer() {
 }
 
 function ModelPanel({
+  t,
+  formatNumber,
+  formatCost,
   model,
   selectedId,
   onSelect,
   row,
   text,
 }: {
+  t: (typeof ui)[Locale];
+  formatNumber: (n: number) => string;
+  formatCost: (n: number) => string;
   model: ModelDef;
   selectedId: string;
   onSelect: (id: string) => void;
@@ -254,7 +274,7 @@ function ModelPanel({
     <div className="flex flex-col gap-4">
       <Select value={selectedId} onValueChange={(v) => v && onSelect(v)}>
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="Escolhe um modelo" />
+          <SelectValue placeholder={t.choosePlaceholder} />
         </SelectTrigger>
         <SelectContent>
           {PROVIDERS.map((provider) => (
@@ -272,11 +292,11 @@ function ModelPanel({
 
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={model.accuracy === "exact" ? "default" : "secondary"}>
-          {model.accuracy === "exact" ? "Exato" : "≈ Estimado"}
+          {model.accuracy === "exact" ? t.badgeExact : t.badgeApprox}
         </Badge>
         {model.contextWindow && (
           <Badge variant="outline">
-            Contexto: {formatNumber(model.contextWindow)}
+            {t.contextBadge(formatNumber(model.contextWindow))}
           </Badge>
         )}
       </div>
@@ -285,31 +305,33 @@ function ModelPanel({
 
       <div className="grid grid-cols-2 gap-4">
         <Stat
-          label="Tokens"
+          label={t.statTokens}
           value={row?.status === "ready" ? formatNumber(row.tokens) : "…"}
         />
-        <Stat label="Caracteres" value={formatNumber(text.length)} />
+        <Stat label={t.statChars} value={formatNumber(text.length)} />
         <Stat
-          label="Custo estimado (input)"
+          label={t.statCost}
           value={cost !== null ? formatCost(cost) : "—"}
         />
         {model.contextWindow && row?.status === "ready" && (
           <Stat
-            label="% da janela"
+            label={t.statContextPct}
             value={`${((row.tokens / model.contextWindow) * 100).toFixed(2)}%`}
           />
         )}
       </div>
 
-      {model.note && <p className="text-muted-foreground text-xs">{model.note}</p>}
+      {model.noteKey && (
+        <p className="text-muted-foreground text-xs">{t.notes[model.noteKey]}</p>
+      )}
 
       <div>
-        <p className="mb-2 text-xs font-medium">
-          Cada bloco colorido abaixo é um token — assim é que o modelo &quot;vê&quot; o teu texto.
-        </p>
+        <p className="mb-2 text-xs font-medium">{t.visualizerHint}</p>
         <TokenVisualizer
           segments={row?.segments ?? []}
           overflow={row?.overflow ?? false}
+          emptyText={t.visualizerEmpty}
+          overflowText={t.visualizerOverflow}
         />
       </div>
     </div>

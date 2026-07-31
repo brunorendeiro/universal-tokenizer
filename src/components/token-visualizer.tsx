@@ -16,26 +16,21 @@ const PALETTE = [
 export function TokenVisualizer({
   segments,
   overflow,
+  emptyText,
+  overflowText,
 }: {
   segments: string[];
   /** true when the text was too long to break down and only a count is available */
   overflow: boolean;
+  emptyText: string;
+  overflowText: string;
 }) {
   if (overflow) {
-    return (
-      <p className="text-muted-foreground text-sm">
-        Texto demasiado grande para mostrar cada token individualmente — mas a
-        contagem acima continua exata.
-      </p>
-    );
+    return <p className="text-muted-foreground text-sm">{overflowText}</p>;
   }
 
   if (segments.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">
-        Escreve algo para veres os tokens destacados aqui.
-      </p>
-    );
+    return <p className="text-muted-foreground text-sm">{emptyText}</p>;
   }
 
   return (

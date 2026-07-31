@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Universal Tokenizer",
   description:
-    "Conta tokens e estima custos para GPT, Claude, Gemini, Llama, Mistral e Qwen — tudo no browser, sem chave de API.",
+    "Count tokens and estimate costs for GPT, Claude, Gemini, Llama, Mistral, Qwen and more — all in the browser, no API key required.",
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="pt"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
