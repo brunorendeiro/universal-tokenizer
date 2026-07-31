@@ -97,6 +97,11 @@ type UiStrings = {
     similarityMedium: string;
     similarityLow: string;
   };
+  agentInfo: {
+    title: string;
+    intro: string;
+    points: string[];
+  };
 };
 
 export const ui: Record<Locale, UiStrings> = {
@@ -172,6 +177,18 @@ export const ui: Record<Locale, UiStrings> = {
       similarityMedium: "Loosely related",
       similarityLow: "Unrelated",
     },
+    agentInfo: {
+      title: "Tokenizer vs. AI agents",
+      intro:
+        "This app counts tokens for one prompt at a time. An \"agent\" is a model running in a loop, deciding on its own to call tools (read files, run code, search the web...) many times in a row without a human typing each step — but under the hood, every one of those turns is still just a request, tokenized and priced the same way.",
+      points: [
+        "Same base cost: $ per million input tokens + $ per million output tokens, set by the model.",
+        "The conversation grows every turn — since models have no memory of their own, each new request resends the entire history so far, so later turns cost more just to \"re-read\" everything.",
+        "Tool use counts too — both the agent's request to use a tool and the result that tool returns are tokens, and get billed.",
+        "\"Thinking\" is billed output — reasoning tokens are charged even when you don't see the full raw reasoning.",
+        "Caching helps — repeated parts of the conversation can cost as little as ~10% of the normal price instead of full price again.",
+      ],
+    },
   },
   pt: {
     heroTitle: "Universal Tokenizer",
@@ -245,6 +262,18 @@ export const ui: Record<Locale, UiStrings> = {
       similarityMedium: "Vagamente relacionado",
       similarityLow: "Sem relação",
     },
+    agentInfo: {
+      title: "Tokenizer vs. agentes de IA",
+      intro:
+        "Esta app conta tokens para um prompt de cada vez. Um \"agente\" é um modelo a correr em ciclo, que decide sozinho chamar ferramentas (ler ficheiros, correr código, pesquisar na web...) várias vezes seguidas, sem um humano escrever cada passo — mas por baixo, cada uma dessas voltas continua a ser só um pedido, tokenizado e cobrado da mesma forma.",
+      points: [
+        "Mesma base de custo: $ por milhão de tokens de entrada + $ por milhão de tokens de saída, conforme o modelo.",
+        "A conversa cresce a cada volta — como os modelos não têm memória própria, cada novo pedido reenvia todo o histórico até ali, por isso as voltas seguintes custam mais só para \"reler\" tudo.",
+        "As ferramentas também contam — tanto o pedido do agente para usar uma ferramenta como o resultado que ela devolve são tokens, e são cobrados.",
+        "\"Pensar\" é output cobrado — os tokens de raciocínio são cobrados mesmo quando não vês o raciocínio completo.",
+        "O caching ajuda — partes repetidas da conversa podem custar só ~10% do preço normal, em vez de pagares tudo outra vez.",
+      ],
+    },
   },
   de: {
     heroTitle: "Universal Tokenizer",
@@ -317,6 +346,18 @@ export const ui: Record<Locale, UiStrings> = {
       similarityHigh: "Verwandte Bedeutung",
       similarityMedium: "Locker verwandt",
       similarityLow: "Unabhängig",
+    },
+    agentInfo: {
+      title: "Tokenizer vs. KI-Agenten",
+      intro:
+        "Diese App zählt Tokens für jeweils einen Prompt. Ein \"Agent\" ist ein Modell, das in einer Schleife läuft und selbst entscheidet, Werkzeuge zu nutzen (Dateien lesen, Code ausführen, im Web suchen...) — viele Male hintereinander, ohne dass ein Mensch jeden Schritt eintippt. Aber im Hintergrund ist jede dieser Runden immer noch nur eine Anfrage, genauso tokenisiert und abgerechnet.",
+      points: [
+        "Gleiche Basiskosten: $ pro Million Input-Tokens + $ pro Million Output-Tokens, je nach Modell.",
+        "Das Gespräch wächst mit jeder Runde — da Modelle kein eigenes Gedächtnis haben, wird bei jeder neuen Anfrage der gesamte bisherige Verlauf erneut gesendet, spätere Runden kosten also mehr nur fürs \"Nachlesen\".",
+        "Werkzeugnutzung zählt auch — sowohl die Anfrage des Agenten, ein Werkzeug zu nutzen, als auch dessen Ergebnis sind Tokens und werden abgerechnet.",
+        "\"Denken\" ist abgerechneter Output — Reasoning-Tokens werden berechnet, auch wenn du das vollständige Reasoning nicht siehst.",
+        "Caching hilft — wiederholte Teile des Gesprächs können nur ~10% des normalen Preises kosten, statt erneut voll bezahlt zu werden.",
+      ],
     },
   },
 };
