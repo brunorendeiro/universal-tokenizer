@@ -77,6 +77,21 @@ export function TokenCloud3D({
     .map((_, i) => i)
     .sort((a, b) => projected[a].depth - projected[b].depth);
 
+  // Three reference axes through the origin (where each PCA component is
+  // zero), so the rotation has a visible frame instead of points floating
+  // with no sense of orientation or scale.
+  const axisReach = maxAbs * 1.2;
+  const axisLines: { from: [number, number, number]; to: [number, number, number] }[] = [
+    { from: [-axisReach, 0, 0], to: [axisReach, 0, 0] },
+    { from: [0, -axisReach, 0], to: [0, axisReach, 0] },
+    { from: [0, 0, -axisReach], to: [0, 0, axisReach] },
+  ];
+  const projectedAxes = axisLines.map(({ from, to }) => ({
+    from: project(from, yaw, pitch, scaleFactor, viewportRadius),
+    to: project(to, yaw, pitch, scaleFactor, viewportRadius),
+  }));
+  const origin = project([0, 0, 0], yaw, pitch, scaleFactor, viewportRadius);
+
   return (
     <div
       ref={containerRef}
@@ -87,6 +102,25 @@ export function TokenCloud3D({
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
     >
+      <svg className="pointer-events-none absolute inset-0 h-full w-full">
+        {projectedAxes.map((axis, i) => (
+          <line
+            key={i}
+            x1={viewportRadius + axis.from.x}
+            y1={viewportRadius + axis.from.y}
+            x2={viewportRadius + axis.to.x}
+            y2={viewportRadius + axis.to.y}
+            className="stroke-muted-foreground/25"
+            strokeWidth={1}
+          />
+        ))}
+        <circle
+          cx={viewportRadius + origin.x}
+          cy={viewportRadius + origin.y}
+          r={2.5}
+          className="fill-muted-foreground/40"
+        />
+      </svg>
       {order.map((i) => {
         const proj = projected[i];
         const fontSize = 11 + proj.depth * 8;
