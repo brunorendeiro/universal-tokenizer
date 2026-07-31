@@ -83,10 +83,10 @@ type UiStrings = {
     disclaimer: string;
     activateButton: string;
     loading: (pct: string) => string;
-    heatmapTitle: string;
-    heatmapDesc: string;
-    heatmapLegendLow: string;
-    heatmapLegendHigh: string;
+    cloudTitle: string;
+    cloudDesc: string;
+    cloudDragHint: string;
+    cloudColorHint: string;
     compareTitle: string;
     compareDesc: string;
     textAPlaceholder: string;
@@ -156,11 +156,11 @@ export const ui: Record<Locale, UiStrings> = {
         "This uses a small general-purpose embedding model (all-MiniLM-L6-v2), not the model whose tokenizer you picked above — there's no public way to see GPT/Claude/Gemini's real internal vectors, since that needs their private weights. This demonstrates the same underlying concept with an open model instead.",
       activateButton: "Show vectors (downloads a ~90MB model, once)",
       loading: (pct) => `Loading model… ${pct}%`,
-      heatmapTitle: "Token vector heatmap",
-      heatmapDesc:
-        "Each row is a token from the text above; each thin colored bar is one of its 384 vector dimensions.",
-      heatmapLegendLow: "negative",
-      heatmapLegendHigh: "positive",
+      cloudTitle: "3D map of meaning",
+      cloudDesc:
+        "Each token becomes a point in 3D space (reduced from 384 dimensions down to 3 with PCA) — words with similar meaning end up closer together.",
+      cloudDragHint: "Drag to rotate — it also spins on its own",
+      cloudColorHint: "Color shows each token's vector strength — a stand-in \"4th dimension\" you can see.",
       compareTitle: "How similar are these two sentences?",
       compareDesc:
         "Semantic similarity — this compares meaning, not shared words. Try two very different sentences that mean the same thing. Works best with English text (the model was trained on English).",
@@ -229,11 +229,11 @@ export const ui: Record<Locale, UiStrings> = {
         "Isto usa um modelo de embeddings pequeno e genérico (all-MiniLM-L6-v2), não o modelo cujo tokenizer escolheste em cima — não existe forma pública de ver os vetores internos reais do GPT/Claude/Gemini, isso precisa dos pesos privados deles. Isto demonstra o mesmo conceito com um modelo aberto.",
       activateButton: "Mostrar vetores (descarrega um modelo de ~90MB, uma vez)",
       loading: (pct) => `A carregar modelo… ${pct}%`,
-      heatmapTitle: "Mapa de calor dos vetores por token",
-      heatmapDesc:
-        "Cada linha é um token do texto acima; cada barra colorida fina é uma das 384 dimensões do seu vetor.",
-      heatmapLegendLow: "negativo",
-      heatmapLegendHigh: "positivo",
+      cloudTitle: "Mapa 3D do significado",
+      cloudDesc:
+        "Cada token vira um ponto no espaço 3D (reduzido de 384 dimensões para só 3, via PCA) — palavras com significado parecido acabam mais próximas.",
+      cloudDragHint: "Arrasta para rodar — também gira sozinho",
+      cloudColorHint: "A cor mostra a intensidade do vetor de cada token — uma \"4ª dimensão\" que dá para ver.",
       compareTitle: "Quão parecidas são estas duas frases?",
       compareDesc:
         "Semelhança semântica — compara significado, não palavras em comum. Experimenta duas frases muito diferentes que querem dizer o mesmo. Funciona melhor com texto em inglês (o modelo foi treinado em inglês).",
@@ -302,11 +302,11 @@ export const ui: Record<Locale, UiStrings> = {
         "Dies nutzt ein kleines, allgemeines Embedding-Modell (all-MiniLM-L6-v2), nicht das Modell, dessen Tokenizer du oben gewählt hast — es gibt keine öffentliche Möglichkeit, die echten internen Vektoren von GPT/Claude/Gemini zu sehen, das erfordert ihre privaten Gewichte. Dies zeigt dasselbe Konzept stattdessen mit einem offenen Modell.",
       activateButton: "Vektoren anzeigen (lädt einmalig ein ~90MB-Modell)",
       loading: (pct) => `Modell wird geladen… ${pct}%`,
-      heatmapTitle: "Vektor-Heatmap pro Token",
-      heatmapDesc:
-        "Jede Zeile ist ein Token aus dem Text oben; jeder dünne farbige Balken ist eine der 384 Vektordimensionen.",
-      heatmapLegendLow: "negativ",
-      heatmapLegendHigh: "positiv",
+      cloudTitle: "3D-Karte der Bedeutung",
+      cloudDesc:
+        "Jedes Token wird zu einem Punkt im 3D-Raum (von 384 Dimensionen auf nur 3 reduziert, per PCA) — Wörter mit ähnlicher Bedeutung landen näher beieinander.",
+      cloudDragHint: "Zum Drehen ziehen — dreht sich auch von selbst",
+      cloudColorHint: "Die Farbe zeigt die Vektorstärke jedes Tokens — eine sichtbare \"4. Dimension\".",
       compareTitle: "Wie ähnlich sind diese zwei Sätze?",
       compareDesc:
         "Semantische Ähnlichkeit — vergleicht Bedeutung, nicht gemeinsame Wörter. Probier zwei sehr unterschiedliche Sätze mit derselben Bedeutung. Funktioniert am besten mit englischem Text (das Modell wurde auf Englisch trainiert).",

@@ -17,22 +17,3 @@ export function valueToColor(t: number): string {
   const clamped = Math.max(0, Math.min(1, t));
   return clamped < 0.5 ? mix(BLUE, WHITE, clamped * 2) : mix(WHITE, RED, (clamped - 0.5) * 2);
 }
-
-/**
- * Builds a single CSS linear-gradient with hard stops, one band per value —
- * a cheap way to render a per-dimension "barcode" heatmap row without one
- * DOM node per cell (there can be hundreds of dimensions per token).
- */
-export function buildHeatmapGradient(values: number[], min: number, max: number): string {
-  if (values.length === 0) return "none";
-  const range = max - min || 1;
-  const bandWidth = 100 / values.length;
-  const stops: string[] = [];
-  values.forEach((v, i) => {
-    const color = valueToColor((v - min) / range);
-    const start = (i * bandWidth).toFixed(3);
-    const end = ((i + 1) * bandWidth).toFixed(3);
-    stops.push(`${color} ${start}%`, `${color} ${end}%`);
-  });
-  return `linear-gradient(to right, ${stops.join(", ")})`;
-}

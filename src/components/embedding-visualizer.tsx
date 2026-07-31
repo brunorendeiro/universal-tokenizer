@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ui, type Locale } from "@/lib/i18n";
 import { useEmbeddingWorker } from "@/lib/use-embedding-worker";
-import { buildHeatmapGradient } from "@/lib/heatmap-color";
+import { pcaTo3D } from "@/lib/pca";
+import { TokenCloud3D } from "@/components/token-cloud-3d";
 
-const HEATMAP_SAMPLE = "The quick brown fox jumps over the lazy dog.";
+const CLOUD_SAMPLE = "The quick brown fox jumps over the lazy dog.";
 const COMPARE_SAMPLE_A = "I love hiking in the mountains.";
 const COMPARE_SAMPLE_B = "Trekking through peaks brings me joy.";
 const DEBOUNCE_MS = 400;
@@ -35,7 +36,7 @@ export function EmbeddingVisualizer({ locale }: { locale: Locale }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [progressPct, setProgressPct] = useState(0);
 
-  const [heatmapText, setHeatmapText] = useState(HEATMAP_SAMPLE);
+  const [cloudText, setCloudText] = useState(CLOUD_SAMPLE);
   const [rows, setRows] = useState<TokenRow[]>([]);
 
   const [textA, setTextA] = useState(COMPARE_SAMPLE_A);
@@ -49,7 +50,7 @@ export function EmbeddingVisualizer({ locale }: { locale: Locale }) {
     setActive(true);
     setPhase("loading");
     const requestId = crypto.randomUUID();
-    request({ type: "tokenEmbeddings", requestId, text: heatmapText }, (loaded, total) => {
+    request({ type: "tokenEmbeddings", requestId, text: cloudText }, (loaded, total) => {
       setProgressPct(total > 0 ? Math.round((loaded / total) * 100) : 0);
     }).then((res) => {
       setPhase("ready");
@@ -59,13 +60,13 @@ export function EmbeddingVisualizer({ locale }: { locale: Locale }) {
     });
   }
 
-  // Re-run the heatmap whenever its text changes, once activated.
+  // Re-run the point cloud whenever its text changes, once activated.
   useEffect(() => {
     if (!active || phase !== "ready") return;
     const generation = ++generationRef.current;
     const handle = setTimeout(() => {
       const requestId = crypto.randomUUID();
-      request({ type: "tokenEmbeddings", requestId, text: heatmapText }).then((res) => {
+      request({ type: "tokenEmbeddings", requestId, text: cloudText }).then((res) => {
         if (generationRef.current !== generation) return;
         if (res.type === "tokenEmbeddings" && !res.error) {
           setRows(res.tokens.map((token, i) => ({ token, values: res.vectors[i] ?? [] })));
@@ -74,7 +75,7 @@ export function EmbeddingVisualizer({ locale }: { locale: Locale }) {
     }, DEBOUNCE_MS);
     return () => clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [heatmapText, active, phase]);
+  }, [cloudText, active, phase]);
 
   // Re-run the comparator whenever either text changes, once activated.
   useEffect(() => {
@@ -91,22 +92,12 @@ export function EmbeddingVisualizer({ locale }: { locale: Locale }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [textA, textB, active, phase]);
 
-  const { min, max } = useMemo(() => {
-    let lo = Infinity;
-    let hi = -Infinity;
-    for (const row of rows) {
-      for (const v of row.values) {
-        if (v < lo) lo = v;
-        if (v > hi) hi = v;
-      }
-    }
-    if (!Number.isFinite(lo)) return { min: -1, max: 1 };
-    // Center the diverging scale on zero (not on the data's raw min/max
-    // midpoint) so "white" always means zero, not just "middling value" —
-    // otherwise an asymmetric value range skews the whole heatmap toward
-    // one color.
-    const maxAbs = Math.max(Math.abs(lo), Math.abs(hi));
-    return { min: -maxAbs, max: maxAbs };
+  const cloudPoints = useMemo(() => pcaTo3D(rows.map((r) => r.values)).points, [rows]);
+
+  const magnitudes = useMemo(() => {
+    const norms = rows.map((r) => Math.sqrt(r.values.reduce((s, v) => s + v * v, 0)));
+    const maxNorm = Math.max(1e-6, ...norms);
+    return norms.map((n) => n / maxNorm);
   }, [rows]);
 
   const similarityLabel = (s: number) => {
@@ -148,29 +139,21 @@ export function EmbeddingVisualizer({ locale }: { locale: Locale }) {
         {phase === "ready" && (
           <>
             <div className="flex flex-col gap-3">
-              <h3 className="text-sm font-semibold">{t.heatmapTitle}</h3>
-              <p className="text-muted-foreground text-xs">{t.heatmapDesc}</p>
+              <h3 className="text-sm font-semibold">{t.cloudTitle}</h3>
+              <p className="text-muted-foreground text-xs">{t.cloudDesc}</p>
               <Textarea
-                value={heatmapText}
-                onChange={(e) => setHeatmapText(e.target.value)}
+                value={cloudText}
+                onChange={(e) => setCloudText(e.target.value)}
                 className="min-h-16 resize-y font-mono text-sm"
               />
-              <div className="flex flex-col gap-1 overflow-x-auto rounded-md border p-3">
-                {rows.map((row, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <span className="text-muted-foreground w-24 shrink-0 truncate font-mono text-xs">
-                      {row.token}
-                    </span>
-                    <div
-                      className="h-4 flex-1 rounded-sm"
-                      style={{ backgroundImage: buildHeatmapGradient(row.values, min, max) }}
-                    />
-                  </div>
-                ))}
-              </div>
+              <TokenCloud3D
+                tokens={rows.map((r) => r.token)}
+                points={cloudPoints}
+                magnitudes={magnitudes}
+              />
               <div className="text-muted-foreground flex items-center justify-between text-[10px]">
-                <span>← {t.heatmapLegendLow}</span>
-                <span>{t.heatmapLegendHigh} →</span>
+                <span>{t.cloudDragHint}</span>
+                <span>{t.cloudColorHint}</span>
               </div>
             </div>
 
