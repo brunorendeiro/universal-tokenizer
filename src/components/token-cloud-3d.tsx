@@ -126,10 +126,12 @@ export function TokenCloud3D({
         const fontSize = 11 + proj.depth * 8;
         const opacity = 0.35 + proj.depth * 0.65;
         const color = valueToColor(magnitudes[i] ?? 0.5);
+        const [x, y, z] = points[i];
         return (
           <div
             key={i}
-            className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5"
+            title={`${tokens[i]}: (${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`}
+            className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5"
             style={{
               left: viewportRadius + proj.x,
               top: viewportRadius + proj.y,
