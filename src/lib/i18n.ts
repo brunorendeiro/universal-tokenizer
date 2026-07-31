@@ -64,6 +64,7 @@ type UiStrings = {
   statChars: string;
   statCost: string;
   statContextPct: string;
+  statContextPctHint: string;
   visualizerHint: string;
   visualizerEmpty: string;
   visualizerOverflow: string;
@@ -101,6 +102,8 @@ export const ui: Record<Locale, UiStrings> = {
     statChars: "Characters",
     statCost: "Estimated cost (input)",
     statContextPct: "% of context window",
+    statContextPctHint:
+      "The context window is the maximum amount of text a model can “see” at once (input + output). This shows how much of that limit your current prompt uses.",
     visualizerHint:
       "Each colored block below is a token — this is how the model “sees” your text.",
     visualizerEmpty: "Type something to see the highlighted tokens here.",
@@ -148,6 +151,8 @@ export const ui: Record<Locale, UiStrings> = {
     statChars: "Caracteres",
     statCost: "Custo estimado (input)",
     statContextPct: "% da janela de contexto",
+    statContextPctHint:
+      "A janela de contexto é a quantidade máxima de texto que um modelo consegue “ver” de uma vez (input + resposta). Isto mostra quanto desse limite o teu prompt atual está a usar.",
     visualizerHint:
       "Cada bloco colorido abaixo é um token — assim é que o modelo “vê” o teu texto.",
     visualizerEmpty: "Escreve algo para veres os tokens destacados aqui.",
@@ -195,6 +200,8 @@ export const ui: Record<Locale, UiStrings> = {
     statChars: "Zeichen",
     statCost: "Geschätzte Kosten (Input)",
     statContextPct: "% des Kontextfensters",
+    statContextPctHint:
+      "Das Kontextfenster ist die maximale Textmenge, die ein Modell auf einmal “sehen” kann (Input + Output). Dies zeigt, wie viel von diesem Limit dein aktueller Prompt nutzt.",
     visualizerHint:
       "Jeder farbige Block unten ist ein Token — so “sieht” das Modell deinen Text.",
     visualizerEmpty: "Schreib etwas, um die hervorgehobenen Tokens hier zu sehen.",

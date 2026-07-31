@@ -316,6 +316,7 @@ function ModelPanel({
         {model.contextWindow && row?.status === "ready" && (
           <Stat
             label={t.statContextPct}
+            hint={t.statContextPctHint}
             value={`${((row.tokens / model.contextWindow) * 100).toFixed(2)}%`}
           />
         )}
@@ -338,10 +339,23 @@ function ModelPanel({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+}) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-muted-foreground text-xs">{label}</span>
+      <span
+        className={`text-muted-foreground text-xs ${hint ? "cursor-help underline decoration-dotted underline-offset-2" : ""}`}
+        title={hint}
+      >
+        {label}
+      </span>
       <span className="text-xl font-semibold tabular-nums">{value}</span>
     </div>
   );
