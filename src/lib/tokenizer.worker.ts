@@ -6,6 +6,7 @@
 // model is selected.
 
 import { MODELS } from "@/lib/models";
+import { idsToSegments } from "@/lib/token-segments";
 
 type LiteTiktoken = import("js-tiktoken/lite").Tiktoken;
 type HfTokenizer = import("@huggingface/transformers").PreTrainedTokenizer;
@@ -48,26 +49,6 @@ async function getHfTokenizer(repo: string): Promise<HfTokenizer> {
     hfTokenizerCache.set(repo, cached);
   }
   return cached;
-}
-
-/**
- * Turns a list of token ids into the exact substrings they cover, by
- * decoding cumulative prefixes and diffing. This is what makes the
- * visualization byte-accurate even when a multi-byte character (e.g. an
- * emoji or accented letter) is split across two tokens.
- */
-function idsToSegments(
-  ids: number[],
-  decode: (slice: number[]) => string,
-): string[] {
-  const segments: string[] = [];
-  let prevText = "";
-  for (let i = 0; i < ids.length; i++) {
-    const cumulative = decode(ids.slice(0, i + 1));
-    segments.push(cumulative.slice(prevText.length));
-    prevText = cumulative;
-  }
-  return segments;
 }
 
 export interface WorkerRequest {

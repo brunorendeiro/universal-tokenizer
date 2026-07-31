@@ -77,6 +77,26 @@ type UiStrings = {
   cookieAccept: string;
   cookieReject: string;
   notes: Record<NoteKey, string>;
+  embeddings: {
+    title: string;
+    subtitle: string;
+    disclaimer: string;
+    activateButton: string;
+    loading: (pct: string) => string;
+    heatmapTitle: string;
+    heatmapDesc: string;
+    heatmapLegendLow: string;
+    heatmapLegendHigh: string;
+    compareTitle: string;
+    compareDesc: string;
+    textAPlaceholder: string;
+    textBPlaceholder: string;
+    similarityLabel: string;
+    similarityVeryHigh: string;
+    similarityHigh: string;
+    similarityMedium: string;
+    similarityLow: string;
+  };
 };
 
 export const ui: Record<Locale, UiStrings> = {
@@ -128,6 +148,30 @@ export const ui: Record<Locale, UiStrings> = {
       approxNoPublicTokenizer:
         "This provider doesn't publish a tokenizer — count is estimated.",
     },
+    embeddings: {
+      title: "How AI understands meaning",
+      subtitle:
+        "Tokens are just how text gets split. This is what happens next: each token becomes a list of numbers (a vector) that captures its meaning.",
+      disclaimer:
+        "This uses a small general-purpose embedding model (all-MiniLM-L6-v2), not the model whose tokenizer you picked above — there's no public way to see GPT/Claude/Gemini's real internal vectors, since that needs their private weights. This demonstrates the same underlying concept with an open model instead.",
+      activateButton: "Show vectors (downloads a ~90MB model, once)",
+      loading: (pct) => `Loading model… ${pct}%`,
+      heatmapTitle: "Token vector heatmap",
+      heatmapDesc:
+        "Each row is a token from the text above; each thin colored bar is one of its 384 vector dimensions.",
+      heatmapLegendLow: "negative",
+      heatmapLegendHigh: "positive",
+      compareTitle: "How similar are these two sentences?",
+      compareDesc:
+        "Semantic similarity — this compares meaning, not shared words. Try two very different sentences that mean the same thing. Works best with English text (the model was trained on English).",
+      textAPlaceholder: "First sentence...",
+      textBPlaceholder: "Second sentence...",
+      similarityLabel: "Semantic similarity",
+      similarityVeryHigh: "Nearly the same meaning",
+      similarityHigh: "Related meaning",
+      similarityMedium: "Loosely related",
+      similarityLow: "Unrelated",
+    },
   },
   pt: {
     heroTitle: "Universal Tokenizer",
@@ -177,6 +221,30 @@ export const ui: Record<Locale, UiStrings> = {
       approxNoPublicTokenizer:
         "Este fornecedor não publica um tokenizer — contagem estimada.",
     },
+    embeddings: {
+      title: "Como a IA entende significado",
+      subtitle:
+        "Os tokens são só como o texto é cortado. Isto é o que acontece a seguir: cada token vira uma lista de números (um vetor) que representa o seu significado.",
+      disclaimer:
+        "Isto usa um modelo de embeddings pequeno e genérico (all-MiniLM-L6-v2), não o modelo cujo tokenizer escolheste em cima — não existe forma pública de ver os vetores internos reais do GPT/Claude/Gemini, isso precisa dos pesos privados deles. Isto demonstra o mesmo conceito com um modelo aberto.",
+      activateButton: "Mostrar vetores (descarrega um modelo de ~90MB, uma vez)",
+      loading: (pct) => `A carregar modelo… ${pct}%`,
+      heatmapTitle: "Mapa de calor dos vetores por token",
+      heatmapDesc:
+        "Cada linha é um token do texto acima; cada barra colorida fina é uma das 384 dimensões do seu vetor.",
+      heatmapLegendLow: "negativo",
+      heatmapLegendHigh: "positivo",
+      compareTitle: "Quão parecidas são estas duas frases?",
+      compareDesc:
+        "Semelhança semântica — compara significado, não palavras em comum. Experimenta duas frases muito diferentes que querem dizer o mesmo. Funciona melhor com texto em inglês (o modelo foi treinado em inglês).",
+      textAPlaceholder: "Primeira frase...",
+      textBPlaceholder: "Segunda frase...",
+      similarityLabel: "Semelhança semântica",
+      similarityVeryHigh: "Quase o mesmo significado",
+      similarityHigh: "Significado relacionado",
+      similarityMedium: "Vagamente relacionado",
+      similarityLow: "Sem relação",
+    },
   },
   de: {
     heroTitle: "Universal Tokenizer",
@@ -225,6 +293,30 @@ export const ui: Record<Locale, UiStrings> = {
       historical: "Historisches Modell (2019) — Tokenizer war schon immer öffentlich.",
       approxNoPublicTokenizer:
         "Dieser Anbieter veröffentlicht keinen Tokenizer — Zählung geschätzt.",
+    },
+    embeddings: {
+      title: "Wie KI Bedeutung versteht",
+      subtitle:
+        "Tokens sind nur, wie Text aufgeteilt wird. Das passiert als Nächstes: Jedes Token wird zu einer Zahlenliste (einem Vektor), die seine Bedeutung erfasst.",
+      disclaimer:
+        "Dies nutzt ein kleines, allgemeines Embedding-Modell (all-MiniLM-L6-v2), nicht das Modell, dessen Tokenizer du oben gewählt hast — es gibt keine öffentliche Möglichkeit, die echten internen Vektoren von GPT/Claude/Gemini zu sehen, das erfordert ihre privaten Gewichte. Dies zeigt dasselbe Konzept stattdessen mit einem offenen Modell.",
+      activateButton: "Vektoren anzeigen (lädt einmalig ein ~90MB-Modell)",
+      loading: (pct) => `Modell wird geladen… ${pct}%`,
+      heatmapTitle: "Vektor-Heatmap pro Token",
+      heatmapDesc:
+        "Jede Zeile ist ein Token aus dem Text oben; jeder dünne farbige Balken ist eine der 384 Vektordimensionen.",
+      heatmapLegendLow: "negativ",
+      heatmapLegendHigh: "positiv",
+      compareTitle: "Wie ähnlich sind diese zwei Sätze?",
+      compareDesc:
+        "Semantische Ähnlichkeit — vergleicht Bedeutung, nicht gemeinsame Wörter. Probier zwei sehr unterschiedliche Sätze mit derselben Bedeutung. Funktioniert am besten mit englischem Text (das Modell wurde auf Englisch trainiert).",
+      textAPlaceholder: "Erster Satz...",
+      textBPlaceholder: "Zweiter Satz...",
+      similarityLabel: "Semantische Ähnlichkeit",
+      similarityVeryHigh: "Fast dieselbe Bedeutung",
+      similarityHigh: "Verwandte Bedeutung",
+      similarityMedium: "Locker verwandt",
+      similarityLow: "Unabhängig",
     },
   },
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { Tokenizer } from "@/components/tokenizer";
+import { EmbeddingVisualizer } from "@/components/embedding-visualizer";
 import { CookieConsent } from "@/components/cookie-consent";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { useLocale, ui } from "@/lib/i18n";
@@ -24,6 +25,9 @@ export default function Home() {
         <LocaleSwitcher locale={locale} setLocale={setLocale} />
       </header>
       <Tokenizer locale={locale} />
+      <div className="mt-6 w-full">
+        <EmbeddingVisualizer locale={locale} />
+      </div>
       <footer className="text-muted-foreground mt-12 flex w-full max-w-[1600px] flex-col items-center gap-1 border-t px-4 py-6 text-sm">
         <p className="max-w-[1600px] text-center text-xs">
           {t.footerNote(EXACT_LABELS.join(", "))}
