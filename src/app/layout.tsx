@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -15,7 +15,40 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Universal Tokenizer",
   description:
-    "Count tokens and estimate costs for GPT, Claude, Gemini, Llama, Mistral, Qwen and more — all in the browser, no API key required.",
+    "Inspect tokens, compare model efficiency, and forecast AI costs locally in your browser — no API key required.",
+  applicationName: "Universal Tokenizer",
+  creator: "Bruno Rendeiro",
+  keywords: [
+    "AI tokenizer",
+    "token counter",
+    "LLM cost calculator",
+    "GPT tokens",
+    "Claude tokens",
+    "local AI tools",
+  ],
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    title: "Universal Tokenizer",
+    description:
+      "Inspect how AI models read your prompt and forecast token costs — privately in your browser.",
+    siteName: "Universal Tokenizer",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Universal Tokenizer",
+    description:
+      "Inspect how AI models read your prompt and forecast token costs — privately in your browser.",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f7f8fa",
+  colorScheme: "light",
 };
 
 export default function RootLayout({

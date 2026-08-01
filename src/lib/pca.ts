@@ -25,9 +25,18 @@ function subtract(a: number[], b: number[]): number[] {
 }
 
 /** Dominant eigenvector of a symmetric matrix via power iteration. */
-function powerIteration(matrix: number[][], iterations = 100): { vector: number[]; eigenvalue: number } {
+function powerIteration(
+  matrix: number[][],
+  iterations = 100,
+  seed = 1,
+): { vector: number[]; eigenvalue: number } {
   const n = matrix.length;
-  let v = Array.from({ length: n }, () => Math.random() - 0.5);
+  // A deterministic seed keeps the 3D map stable when the same text is
+  // recalculated, while still avoiding a uniform starting vector.
+  let v = Array.from(
+    { length: n },
+    (_, index) => Math.sin((index + 1) * (seed + 0.5)),
+  );
   const vn = norm(v) || 1;
   v = scale(v, 1 / vn);
 
@@ -76,7 +85,7 @@ export function pcaTo3D(vectors: number[][]): PcaResult {
   const deflated = gram.map((row) => [...row]);
 
   for (let c = 0; c < numComponents; c++) {
-    const { vector, eigenvalue } = powerIteration(deflated);
+    const { vector, eigenvalue } = powerIteration(deflated, 100, c + 1);
     if (eigenvalue <= 1e-10) break;
 
     // Map the n-dim eigenvector back into d-dim space: axis = Xᵀ * vector, then normalize.

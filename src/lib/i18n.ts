@@ -25,12 +25,15 @@ export function useLocale() {
     // which isn't available during SSR. Running it during render would
     // desync the client's first paint from the server-rendered HTML
     // (hydration mismatch) — the one-render delay here is the trade-off.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLocaleState(detectLocale());
+    const detected = detectLocale();
+    document.documentElement.lang = detected;
+    const handle = window.setTimeout(() => setLocaleState(detected), 0);
+    return () => window.clearTimeout(handle);
   }, []);
 
   function setLocale(next: Locale) {
     window.localStorage.setItem(STORAGE_KEY, next);
+    document.documentElement.lang = next;
     setLocaleState(next);
   }
 
@@ -45,8 +48,18 @@ export type NoteKey =
   | "approxNoPublicTokenizer";
 
 type UiStrings = {
+  eyebrow: string;
+  brandSubtitle: string;
+  engineOnline: string;
+  sectionsLabel: string;
   heroTitle: string;
   heroSubtitle: string;
+  navWorkbench: string;
+  navEmbeddings: string;
+  navAgents: string;
+  localBadge: string;
+  modelProfiles: (n: number) => string;
+  exactTokenizers: (n: number) => string;
   yourTextTitle: string;
   yourTextDesc: string;
   textareaPlaceholder: string;
@@ -65,9 +78,27 @@ type UiStrings = {
   statCost: string;
   statContextPct: string;
   statContextPctHint: string;
+  contextExplainerTitle: (percentage: string) => string;
+  contextExplainerBody: (used: string, total: string) => string;
   visualizerHint: string;
   visualizerEmpty: string;
   visualizerOverflow: string;
+  clearText: string;
+  copyText: string;
+  copiedText: string;
+  responseBudgetLabel: string;
+  responseBudgetHint: string;
+  statInputCost: string;
+  statOutputCost: string;
+  statTotalCost: string;
+  plainTextNotice: string;
+  loadExactModels: string;
+  loadingExactModels: string;
+  tokenizerIdle: string;
+  tokenizerError: string;
+  retry: string;
+  exactMethod: string;
+  proxyMethod: string;
   efficiencyTitle: string;
   efficiencyDesc: string;
   footerNote: (models: string) => string;
@@ -98,6 +129,7 @@ type UiStrings = {
     similarityLow: string;
   };
   agentInfo: {
+    eyebrow: string;
     title: string;
     intro: string;
     points: string[];
@@ -106,9 +138,19 @@ type UiStrings = {
 
 export const ui: Record<Locale, UiStrings> = {
   en: {
+    eyebrow: "Token analysis and cost forecasting",
+    brandSubtitle: "Tokenizer & cost calculator",
+    engineOnline: "Local processing ready",
+    sectionsLabel: "Application sections",
     heroTitle: "Universal Tokenizer",
     heroSubtitle:
-      "Count tokens, see the exact split, and estimate costs for GPT, Claude, Gemini, Llama, Mistral, Qwen and more — all local in your browser, no API key.",
+      "Inspect how models read your prompt, compare token efficiency, and forecast input and output cost — privately, inside your browser.",
+    navWorkbench: "Token workbench",
+    navEmbeddings: "Semantic lab",
+    navAgents: "Agent guide",
+    localBadge: "Text never leaves this browser",
+    modelProfiles: (n) => `${n} model profiles`,
+    exactTokenizers: (n) => `${n} exact tokenizers`,
     yourTextTitle: "Your text",
     yourTextDesc:
       "Type or paste your prompt — the count updates automatically for every model.",
@@ -129,11 +171,31 @@ export const ui: Record<Locale, UiStrings> = {
     statContextPct: "% of context window",
     statContextPctHint:
       "The context window is the maximum amount of text a model can “see” at once (input + output). This shows how much of that limit your current prompt uses.",
+    contextExplainerTitle: (percentage) => `What does ${percentage} mean?`,
+    contextExplainerBody: (used, total) =>
+      `Think of the context window as the model's working memory. This model can hold up to ${total} tokens at once; your text uses ${used}. The closer this gets to 100%, the less room remains for the reply and conversation history.`,
     visualizerHint:
       "Each colored block below is a token — this is how the model “sees” your text.",
     visualizerEmpty: "Type something to see the highlighted tokens here.",
     visualizerOverflow:
       "Text too long to show each individual token — but the count above is still exact.",
+    clearText: "Clear",
+    copyText: "Copy",
+    copiedText: "Copied",
+    responseBudgetLabel: "Expected response",
+    responseBudgetHint: "Used to forecast output and total cost. It does not change the token count above.",
+    statInputCost: "Prompt cost",
+    statOutputCost: "Response cost",
+    statTotalCost: "Estimated total",
+    plainTextNotice:
+      "Exact means exact for the text above. API message wrappers, system prompts, tools and hidden provider metadata can add billable tokens.",
+    loadExactModels: "Load every open tokenizer",
+    loadingExactModels: "Loading open tokenizers…",
+    tokenizerIdle: "On demand",
+    tokenizerError: "Unavailable",
+    retry: "Retry",
+    exactMethod: "Uses the model's public tokenizer locally in this browser.",
+    proxyMethod: "Proxy estimate using o200k_base; it is not the provider's private tokenizer.",
     efficiencyTitle: "Tokenization efficiency",
     efficiencyDesc:
       "Same sentence, different tokenizers — fewer tokens = cheaper for this text. (Doesn't measure speed or response quality — only how much each model “pays” to read this prompt.)",
@@ -178,6 +240,7 @@ export const ui: Record<Locale, UiStrings> = {
       similarityLow: "Unrelated",
     },
     agentInfo: {
+      eyebrow: "Context economics",
       title: "Tokenizer vs. AI agents",
       intro:
         "This app counts tokens for one prompt at a time. An \"agent\" is a model running in a loop, deciding on its own to call tools (read files, run code, search the web...) many times in a row without a human typing each step — but under the hood, every one of those turns is still just a request, tokenized and priced the same way.",
@@ -191,9 +254,19 @@ export const ui: Record<Locale, UiStrings> = {
     },
   },
   pt: {
+    eyebrow: "Análise de tokens e previsão de custos",
+    brandSubtitle: "Tokenizer e calculadora de custos",
+    engineOnline: "Processamento local pronto",
+    sectionsLabel: "Secções da aplicação",
     heroTitle: "Universal Tokenizer",
     heroSubtitle:
-      "Conta tokens, mostra a separação exata e estima custos para GPT, Claude, Gemini, Llama, Mistral, Qwen e mais — tudo local no browser, sem chave de API.",
+      "Vê como os modelos leem o teu prompt, compara eficiência e prevê custos de entrada e resposta — com privacidade, dentro do browser.",
+    navWorkbench: "Workbench de tokens",
+    navEmbeddings: "Laboratório semântico",
+    navAgents: "Guia de agentes",
+    localBadge: "O texto nunca sai deste browser",
+    modelProfiles: (n) => `${n} perfis de modelo`,
+    exactTokenizers: (n) => `${n} tokenizers exatos`,
     yourTextTitle: "O teu texto",
     yourTextDesc:
       "Escreve ou cola o prompt — a contagem atualiza automaticamente para todos os modelos.",
@@ -214,11 +287,31 @@ export const ui: Record<Locale, UiStrings> = {
     statContextPct: "% da janela de contexto",
     statContextPctHint:
       "A janela de contexto é a quantidade máxima de texto que um modelo consegue “ver” de uma vez (input + resposta). Isto mostra quanto desse limite o teu prompt atual está a usar.",
+    contextExplainerTitle: (percentage) => `O que significa ${percentage}?`,
+    contextExplainerBody: (used, total) =>
+      `Pensa na janela de contexto como a memória de trabalho do modelo. Este modelo consegue guardar até ${total} tokens de uma vez; o teu texto usa ${used}. Quanto mais perto chegar dos 100%, menos espaço sobra para a resposta e para o histórico da conversa.`,
     visualizerHint:
       "Cada bloco colorido abaixo é um token — assim é que o modelo “vê” o teu texto.",
     visualizerEmpty: "Escreve algo para veres os tokens destacados aqui.",
     visualizerOverflow:
       "Texto demasiado grande para mostrar cada token individualmente — mas a contagem acima continua exata.",
+    clearText: "Limpar",
+    copyText: "Copiar",
+    copiedText: "Copiado",
+    responseBudgetLabel: "Resposta esperada",
+    responseBudgetHint: "Serve para prever o custo de output e o total. Não altera a contagem acima.",
+    statInputCost: "Custo do prompt",
+    statOutputCost: "Custo da resposta",
+    statTotalCost: "Total estimado",
+    plainTextNotice:
+      "Exato significa exato para o texto acima. O envelope da API, system prompts, ferramentas e metadados do fornecedor podem acrescentar tokens cobrados.",
+    loadExactModels: "Carregar todos os tokenizers abertos",
+    loadingExactModels: "A carregar tokenizers abertos…",
+    tokenizerIdle: "A pedido",
+    tokenizerError: "Indisponível",
+    retry: "Tentar novamente",
+    exactMethod: "Usa localmente o tokenizer público real deste modelo.",
+    proxyMethod: "Estimativa proxy com o200k_base; não é o tokenizer privado do fornecedor.",
     efficiencyTitle: "Eficiência de tokenização",
     efficiencyDesc:
       "Mesma frase, tokenizers diferentes — menos tokens = mais barato para este texto. (Não mede velocidade nem qualidade da resposta — só quanto cada modelo “paga” para ler este prompt.)",
@@ -263,6 +356,7 @@ export const ui: Record<Locale, UiStrings> = {
       similarityLow: "Sem relação",
     },
     agentInfo: {
+      eyebrow: "Economia de contexto",
       title: "Tokenizer vs. agentes de IA",
       intro:
         "Esta app conta tokens para um prompt de cada vez. Um \"agente\" é um modelo a correr em ciclo, que decide sozinho chamar ferramentas (ler ficheiros, correr código, pesquisar na web...) várias vezes seguidas, sem um humano escrever cada passo — mas por baixo, cada uma dessas voltas continua a ser só um pedido, tokenizado e cobrado da mesma forma.",
@@ -276,9 +370,19 @@ export const ui: Record<Locale, UiStrings> = {
     },
   },
   de: {
+    eyebrow: "Tokenanalyse und Kostenprognose",
+    brandSubtitle: "Tokenizer & Kostenrechner",
+    engineOnline: "Lokale Verarbeitung bereit",
+    sectionsLabel: "Anwendungsbereiche",
     heroTitle: "Universal Tokenizer",
     heroSubtitle:
-      "Zähle Tokens, sieh die genaue Aufteilung und schätze Kosten für GPT, Claude, Gemini, Llama, Mistral, Qwen und mehr — alles lokal im Browser, ohne API-Schlüssel.",
+      "Sieh, wie Modelle deinen Prompt lesen, vergleiche Token-Effizienz und prognostiziere Ein- und Ausgabekosten — privat in deinem Browser.",
+    navWorkbench: "Token-Workbench",
+    navEmbeddings: "Semantik-Labor",
+    navAgents: "Agenten-Guide",
+    localBadge: "Text verlässt diesen Browser nie",
+    modelProfiles: (n) => `${n} Modellprofile`,
+    exactTokenizers: (n) => `${n} exakte Tokenizer`,
     yourTextTitle: "Dein Text",
     yourTextDesc:
       "Schreib oder füg deinen Prompt ein — die Zählung aktualisiert sich automatisch für jedes Modell.",
@@ -299,11 +403,31 @@ export const ui: Record<Locale, UiStrings> = {
     statContextPct: "% des Kontextfensters",
     statContextPctHint:
       "Das Kontextfenster ist die maximale Textmenge, die ein Modell auf einmal “sehen” kann (Input + Output). Dies zeigt, wie viel von diesem Limit dein aktueller Prompt nutzt.",
+    contextExplainerTitle: (percentage) => `Was bedeutet ${percentage}?`,
+    contextExplainerBody: (used, total) =>
+      `Stell dir das Kontextfenster als Arbeitsgedächtnis des Modells vor. Dieses Modell kann bis zu ${total} Tokens gleichzeitig halten; dein Text nutzt ${used}. Je näher der Wert an 100% kommt, desto weniger Platz bleibt für die Antwort und den Gesprächsverlauf.`,
     visualizerHint:
       "Jeder farbige Block unten ist ein Token — so “sieht” das Modell deinen Text.",
     visualizerEmpty: "Schreib etwas, um die hervorgehobenen Tokens hier zu sehen.",
     visualizerOverflow:
       "Text zu lang, um jedes einzelne Token anzuzeigen — die Zählung oben bleibt aber exakt.",
+    clearText: "Leeren",
+    copyText: "Kopieren",
+    copiedText: "Kopiert",
+    responseBudgetLabel: "Erwartete Antwort",
+    responseBudgetHint: "Dient zur Prognose der Output- und Gesamtkosten. Die Tokenzahl oben bleibt unverändert.",
+    statInputCost: "Prompt-Kosten",
+    statOutputCost: "Antwortkosten",
+    statTotalCost: "Geschätzte Summe",
+    plainTextNotice:
+      "Exakt bedeutet exakt für den Text oben. API-Nachrichtenrahmen, System-Prompts, Tools und Anbieter-Metadaten können zusätzliche Tokens verursachen.",
+    loadExactModels: "Alle offenen Tokenizer laden",
+    loadingExactModels: "Offene Tokenizer werden geladen…",
+    tokenizerIdle: "Bei Bedarf",
+    tokenizerError: "Nicht verfügbar",
+    retry: "Erneut versuchen",
+    exactMethod: "Verwendet den öffentlichen Tokenizer dieses Modells lokal im Browser.",
+    proxyMethod: "Proxy-Schätzung mit o200k_base; nicht der private Tokenizer des Anbieters.",
     efficiencyTitle: "Tokenisierungs-Effizienz",
     efficiencyDesc:
       "Gleicher Satz, unterschiedliche Tokenizer — weniger Tokens = günstiger für diesen Text. (Misst nicht Geschwindigkeit oder Antwortqualität — nur wie viel jedes Modell “zahlt”, um diesen Prompt zu lesen.)",
@@ -348,6 +472,7 @@ export const ui: Record<Locale, UiStrings> = {
       similarityLow: "Unabhängig",
     },
     agentInfo: {
+      eyebrow: "Kontextökonomie",
       title: "Tokenizer vs. KI-Agenten",
       intro:
         "Diese App zählt Tokens für jeweils einen Prompt. Ein \"Agent\" ist ein Modell, das in einer Schleife läuft und selbst entscheidet, Werkzeuge zu nutzen (Dateien lesen, Code ausführen, im Web suchen...) — viele Male hintereinander, ohne dass ein Mensch jeden Schritt eintippt. Aber im Hintergrund ist jede dieser Runden immer noch nur eine Anfrage, genauso tokenisiert und abgerechnet.",

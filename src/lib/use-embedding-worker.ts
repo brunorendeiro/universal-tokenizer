@@ -10,64 +10,108 @@ import type {
 
 type Result = TokenEmbeddingResponse | SimilarityResponse;
 
-/**
- * Same shared-worker pattern as useTokenizerWorker, but this worker also
- * streams "progress" events (model download %) before the final result —
- * those are routed to a separate per-request progress callback instead of
- * resolving the promise.
- */
+const REQUEST_TIMEOUT_MS = 120_000;
+
+interface PendingRequest {
+  request: EmbeddingRequest;
+  resolve: (result: Result) => void;
+  timeout: number;
+}
+
+function errorResult(request: EmbeddingRequest, error: string): Result {
+  return request.type === "tokenEmbeddings"
+    ? {
+        type: "tokenEmbeddings",
+        requestId: request.requestId,
+        tokens: [],
+        vectors: [],
+        error,
+      }
+    : {
+        type: "similarity",
+        requestId: request.requestId,
+        similarity: 0,
+        error,
+      };
+}
+
 export function useEmbeddingWorker() {
   const workerRef = useRef<Worker | null>(null);
-  const pendingRef = useRef(new Map<string, (res: Result) => void>());
-  const progressRef = useRef(new Map<string, (loaded: number, total: number) => void>());
+  const pendingRef = useRef(new Map<string, PendingRequest>());
+  const progressRef = useRef(
+    new Map<string, (loaded: number, total: number) => void>(),
+  );
 
   useEffect(() => {
     const pending = pendingRef.current;
     const progress = progressRef.current;
     const worker = new Worker(new URL("./embedding.worker.ts", import.meta.url));
 
+    const resolveAllWithError = (message: string) => {
+      for (const [requestId, entry] of pending) {
+        window.clearTimeout(entry.timeout);
+        entry.resolve(errorResult(entry.request, message));
+        progress.delete(requestId);
+      }
+      pending.clear();
+    };
+
     worker.onmessage = (event: MessageEvent<EmbeddingWorkerMessage>) => {
-      const msg = event.data;
-      if (msg.type === "progress") {
-        progress.get(msg.requestId)?.(msg.loaded, msg.total);
+      const message = event.data;
+      if (message.type === "progress") {
+        progress.get(message.requestId)?.(message.loaded, message.total);
         return;
       }
-      const resolve = pending.get(msg.requestId);
-      if (resolve) {
-        resolve(msg);
-        pending.delete(msg.requestId);
-        progress.delete(msg.requestId);
-      }
+
+      const entry = pending.get(message.requestId);
+      if (!entry) return;
+      window.clearTimeout(entry.timeout);
+      entry.resolve(message);
+      pending.delete(message.requestId);
+      progress.delete(message.requestId);
+    };
+
+    worker.onerror = (event) => {
+      resolveAllWithError(event.message || "Embedding worker failed");
+    };
+    worker.onmessageerror = () => {
+      resolveAllWithError("Embedding worker returned an unreadable response");
     };
     workerRef.current = worker;
 
     return () => {
+      resolveAllWithError("Embedding worker stopped");
       worker.terminate();
       workerRef.current = null;
-      pending.clear();
-      progress.clear();
     };
   }, []);
 
-  const request = useCallback(
-    (req: EmbeddingRequest, onProgress?: (loaded: number, total: number) => void): Promise<Result> => {
-      return new Promise((resolve) => {
+  return useCallback(
+    (
+      request: EmbeddingRequest,
+      onProgress?: (loaded: number, total: number) => void,
+    ): Promise<Result> =>
+      new Promise((resolve) => {
         const worker = workerRef.current;
         if (!worker) {
-          resolve(
-            req.type === "tokenEmbeddings"
-              ? { type: "tokenEmbeddings", requestId: req.requestId, tokens: [], vectors: [], error: "worker not ready" }
-              : { type: "similarity", requestId: req.requestId, similarity: 0, error: "worker not ready" },
-          );
+          resolve(errorResult(request, "Embedding worker is not ready"));
           return;
         }
-        pendingRef.current.set(req.requestId, resolve);
-        if (onProgress) progressRef.current.set(req.requestId, onProgress);
-        worker.postMessage(req);
-      });
-    },
+
+        const timeout = window.setTimeout(() => {
+          pendingRef.current.delete(request.requestId);
+          progressRef.current.delete(request.requestId);
+          resolve(errorResult(request, "Embedding request timed out"));
+        }, REQUEST_TIMEOUT_MS);
+
+        pendingRef.current.set(request.requestId, {
+          request,
+          resolve,
+          timeout,
+        });
+        if (onProgress) progressRef.current.set(request.requestId, onProgress);
+        worker.postMessage(request);
+      }),
     [],
   );
-
-  return request;
 }

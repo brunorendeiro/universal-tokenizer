@@ -36,13 +36,13 @@ export function CookieConsent({ locale }: { locale: Locale }) {
   }
 
   return (
-    <div className="bg-background/95 fixed inset-x-0 bottom-0 z-50 flex flex-col items-center justify-between gap-3 border-t px-4 py-3 backdrop-blur sm:flex-row">
-      <p className="text-muted-foreground text-sm">{t.cookieBody}</p>
+    <div className="fixed inset-x-0 bottom-5 z-50 mx-auto flex w-[760px] items-center justify-between gap-5 rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-[0_18px_45px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+      <p className="text-xs leading-5 text-slate-600">{t.cookieBody}</p>
       <div className="flex shrink-0 gap-2">
-        <Button variant="outline" size="sm" onClick={handleReject}>
+        <Button variant="ghost" size="sm" onClick={handleReject} className="text-slate-500 hover:text-slate-950">
           {t.cookieReject}
         </Button>
-        <Button size="sm" onClick={handleAccept}>
+        <Button size="sm" onClick={handleAccept} className="bg-slate-950 text-white hover:bg-slate-800">
           {t.cookieAccept}
         </Button>
       </div>

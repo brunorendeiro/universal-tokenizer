@@ -28,7 +28,7 @@ export function TokenCloud3D({
 
   // Gentle auto-rotate while idle; pauses the instant the user drags.
   useEffect(() => {
-    if (dragging) return;
+    if (dragging || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const tick = (time: number) => {
       if (lastFrameTime.current != null) {
         const dt = (time - lastFrameTime.current) / 1000;
@@ -95,30 +95,35 @@ export function TokenCloud3D({
   return (
     <div
       ref={containerRef}
-      className="bg-muted/20 relative touch-none overflow-hidden rounded-md border select-none"
+      className="relative touch-none overflow-hidden rounded-xl border border-slate-200 bg-slate-50 select-none"
       style={{ height: VIEWPORT_HEIGHT, cursor: dragging ? "grabbing" : "grab" }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
     >
-      <svg className="pointer-events-none absolute inset-0 h-full w-full">
+      <svg
+        className="pointer-events-none absolute inset-0 h-full w-full"
+        viewBox={`-500 ${-viewportRadius} 1000 ${VIEWPORT_HEIGHT}`}
+        preserveAspectRatio="xMidYMid meet"
+        aria-hidden="true"
+      >
         {projectedAxes.map((axis, i) => (
           <line
             key={i}
-            x1={viewportRadius + axis.from.x}
-            y1={viewportRadius + axis.from.y}
-            x2={viewportRadius + axis.to.x}
-            y2={viewportRadius + axis.to.y}
-            className="stroke-muted-foreground/25"
+            x1={axis.from.x}
+            y1={axis.from.y}
+            x2={axis.to.x}
+            y2={axis.to.y}
+            className="stroke-slate-300"
             strokeWidth={1}
           />
         ))}
         <circle
-          cx={viewportRadius + origin.x}
-          cy={viewportRadius + origin.y}
+          cx={origin.x}
+          cy={origin.y}
           r={2.5}
-          className="fill-muted-foreground/40"
+          className="fill-blue-500"
         />
       </svg>
       {order.map((i) => {
@@ -133,7 +138,8 @@ export function TokenCloud3D({
             title={`${tokens[i]}: (${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`}
             className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5"
             style={{
-              left: viewportRadius + proj.x,
+              left: "50%",
+              marginLeft: proj.x,
               top: viewportRadius + proj.y,
               opacity,
               zIndex: Math.round(proj.depth * 1000),

@@ -11,15 +11,22 @@ export function LocaleSwitcher({
   setLocale: (locale: Locale) => void;
 }) {
   return (
-    <div className="flex items-center gap-0.5 rounded-lg border p-0.5 text-xs">
+    <div
+      className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-slate-100 p-1 text-[10px]"
+      aria-label="Language"
+    >
       {LOCALES.map((l) => (
         <button
           key={l}
           type="button"
+          aria-pressed={l === locale}
+          aria-label={`Switch language to ${l}`}
           onClick={() => setLocale(l)}
           className={cn(
-            "rounded-[calc(var(--radius-lg)-2px)] px-1.5 py-1 font-medium uppercase transition-colors",
-            l === locale ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+            "rounded-md px-2 py-1.5 font-semibold uppercase tracking-wider transition-colors",
+            l === locale
+              ? "bg-white text-slate-950 shadow-sm"
+              : "text-slate-500 hover:bg-white/70 hover:text-slate-900",
           )}
         >
           {l}
