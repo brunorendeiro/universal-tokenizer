@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Universal Tokenizer</title>
+  <desc id="desc">Token analysis and cost forecasting, privately in your browser.</desc>
+  <rect width="1200" height="630" fill="#f7f8fa"/>
+  <rect x="72" y="72" width="88" height="88" rx="22" fill="#eff6ff" stroke="#bfdbfe" stroke-width="3"/>
+  <path d="M98 102h36v28H98zM105 95v14M127 95v14M105 137v14M127 137v14" fill="none" stroke="#2563eb" stroke-width="7" stroke-linecap="round"/>
+  <text x="192" y="133" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#0f172a">Universal Tokenizer</text>
+  <text x="80" y="294" font-family="Arial, sans-serif" font-size="62" font-weight="700" fill="#0f172a">Inspect tokens.</text>
+  <text x="80" y="370" font-family="Arial, sans-serif" font-size="62" font-weight="700" fill="#0f172a">Forecast AI costs.</text>
+  <text x="80" y="450" font-family="Arial, sans-serif" font-size="28" fill="#475569">Private, local processing in your browser.</text>
+  <rect x="80" y="510" width="370" height="12" rx="6" fill="#2563eb"/>
+</svg>

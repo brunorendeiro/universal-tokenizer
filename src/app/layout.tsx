@@ -13,9 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://universal-tokenizer.vercel.app"),
   title: "Universal Tokenizer",
   description:
     "Inspect tokens, compare model efficiency, and forecast AI costs locally in your browser — no API key required.",
+  alternates: {
+    canonical: "/",
+  },
   applicationName: "Universal Tokenizer",
   creator: "Bruno Rendeiro",
   keywords: [
@@ -37,12 +41,22 @@ export const metadata: Metadata = {
     description:
       "Inspect how AI models read your prompt and forecast token costs — privately in your browser.",
     siteName: "Universal Tokenizer",
+    url: "/",
+    images: [
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "Universal Tokenizer — token analysis and cost forecasting",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Universal Tokenizer",
     description:
       "Inspect how AI models read your prompt and forecast token costs — privately in your browser.",
+    images: ["/og-image.svg"],
   },
 };
 
